@@ -1,3 +1,0 @@
-[submodule "casadi_extras"]
-	path = casadi_extras
-	url = git@github.com:mkatliar/casadi_extras.git
