@@ -26,13 +26,13 @@ import numpy as np
 
 #from omsf.gravity import DEFAULT_GRAVITY
 
-"""
-\brief Plots each column of y on a separate subplot with a label defined by y_label. 
-
-If 6-th argument is a function handle, it is interpreted as a
-function to use for plotting (i.e., plot(), hist()). By default, plot() is used.
-"""
 def _plot_components(fig, t, y, ttl, x_label, y_label, *args, **kwargs):
+    """Plots each column of y on a separate subplot with a label defined by y_label. 
+
+    If 6-th argument is a function handle, it is interpreted as a
+    function to use for plotting (i.e., plot(), hist()). By default, plot() is used.
+    """
+
     assert t.ndim == 1
     
     if y.shape[0] != len(t) and y.shape[1] == len(t):
@@ -81,17 +81,18 @@ def _plot_vestibular_input(fig, t, ves, *args, **kwargs):
     
     _plot_components(fig, t, ves1, 'Inertial signal', 't [s]', y_label, *args, **kwargs)
 
+
 def plotRecordedMotion(motion, fig, **kwargs):
     label = ['$a_x [m/s^2]$', '$a_y [m/s^2]$', '$a_z [m/s^2]$', \
             '$\omega_x [s^{-1}]$', '$\omega_y [s^{-1}]$', '$\omega_z [s^{-1}]$', \
             '$\omega\'_x [s^{-2}]$', '$\omega\'_y [s^{-2}]$', '$\omega\'_z [s^{-2}]$']
         
     _plot_components(fig, motion.time, np.vstack([motion.gia, motion.rotationalVelocity, motion.rotationalAcceleration]), '', '$t [s]$', label, **kwargs)
+
     
-"""
-\brief Plot vestibular part of sensory input.
-"""
 def PlotVestibularInput(sensory_signal, fig, *args, **kwargs):
+    """Plot vestibular part of sensory input.
+    """
     _plot_vestibular_input(fig, sensory_signal.time, sensory_signal.getInertialInput(sensory_signal.time), *args, **kwargs)
         
     

@@ -94,7 +94,7 @@ class MotionPlatform(object):
         y['omega'] = cs.densify(omega_H)
         y['alpha'] = cs.densify(alpha_H)
 
-        self.output = cs.Function('MotionPlatformOutputFunction',
+        self.output = cs.Function('MotionPlatform_output',
             [state.expr, alg_state.expr, input.expr, param.expr, GRAVITY, T_HP], [y], 
             ['x', 'z', 'u', 'p', 'g', 'T_HP'], ['y'])
 
@@ -105,6 +105,7 @@ class MotionPlatform(object):
                                                 [cs.mtimes(T_HW[: 3, : 3].T, GRAVITY)],
                                                 ['x', 'z', 'p', 'g', 'T_HP'], ['g'])
 
+    
     """
     def headFrameGravity(self, x, z):
         '''Calculate gravity in head frame.
@@ -138,3 +139,12 @@ class MotionPlatform(object):
             
         return self.output(x=state, z=alg_state, u=input, p=param, g=gravity, T_HP=head_to_platform)['y']
     """
+
+
+def platformToWorldFunction(motion_platform):
+    """Returns CasADi function object to compute PF->WF transformation.
+    """
+    return cs.Function('MotionPlatform_platformToWorld', 
+        [motion_platform.state.expr, motion_platform.algState.expr, motion_platform.param.expr], 
+        [motion_platform.T_PW],
+        ['x', 'z', 'p'], ['T_PW'])

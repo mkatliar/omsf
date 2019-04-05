@@ -169,6 +169,8 @@ def recordedMotionToSensorySignal(motion, g_world_visual):
 
 
 def evaluateMotion(fig, sensory_signal, system_trajectory, param, scenario, step=0.01):
+    """TODO: 'scenario' arg seems to be unused, remove?
+    """
     _plot_vestibular_input(fig, sensory_signal.time, sensory_signal.inertialSignal(sensory_signal.time), 'r')
 
     t, ves_out = system_trajectory.inertialSignal.discretize(step)
