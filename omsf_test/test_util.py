@@ -24,6 +24,8 @@ import unittest
 import os
 import numpy as np, numpy.testing
 
+import omsf
+import omsf.io.matlab
 import omsf.util as util
 import omsf.transform as tr
 from omsf.math import crossProductMatrix
@@ -43,6 +45,12 @@ class Test(unittest.TestCase):
         z = util.cumrect(y, x)
         
         np.testing.assert_allclose(z, np.array([[0, 0], [1, 2], [3, 6]]).T * k)
+
+
+    def test_recordedMotionToSensorySignal(self):
+        motion = omsf.io.matlab.loadRecordedMotion(os.path.join(DATA_DIR, 'AccDec.mat'))
+        g_world_visual = np.array([0, 0, -1])
+        omsf.recordedMotionToSensorySignal(motion, g_world_visual)
 
 
 class TestTransformInertialSignal(unittest.TestCase):

@@ -34,16 +34,9 @@ import unittest
 DATA_DIR = 'omsf_test/data'
 
 
-class Test(unittest.TestCase):
+class TestOptimizer(unittest.TestCase):
 
-    def testRecordedMotionToSensorySignal(self):
-        motion = omsf.io.matlab.loadRecordedMotion(os.path.join(DATA_DIR, 'AccDec.mat'))
-        g_world_visual = np.array([0, 0, -1])
-        omsf.recordedMotionToSensorySignal(motion, g_world_visual)
-
-        
-    def testInitialAndFinalStateBounds(self):
-        
+    def setUp(self):
         platform = MotionPlatformX()
 
         #----------------------------------
@@ -57,30 +50,51 @@ class Test(unittest.TestCase):
 
         scenario = omsf.Scenario(platform, lagrange_term=L)
         scenario.state.nominal['platform'] = platform.state.expr(0)
-        
-        #----------------------------------
-        # Set the cost function.
-        #----------------------------------
-        # Weighting factor for rotational velocity.
-        rotationalVelocityWeight = 10
-        # Weighting matrix
-        w = cs.diag([1, 1, 1, rotationalVelocityWeight, rotationalVelocityWeight, rotationalVelocityWeight])
 
+        data = omsf.io.matlab.loadRecordedMotion(os.path.join(DATA_DIR, 'AccDec.mat'))
+        si = omsf.recordedMotionToSensorySignal(data, np.array([0, 0, -1]))
+
+        self._scenario = scenario
+        self._sensorySignal = [si.cut(3, 5)]
+        self._platform = platform
+
+
+    def test_optimize(self):
+        optimizer = omsf.Optimizer()
+        optimizer.optimizationOptions = {'ipopt': {'linear_solver': 'ma86', 'max_iter': 100}}
+        
+        res = optimizer.optimize(self._scenario, self._sensorySignal)
+        self.assertTrue('trajectory' in res)
+        self.assertEqual(len(res['trajectory']), len(self._sensorySignal))
+        self.assertTrue('param' in res)
+        self.assertTrue('objective' in res)
+        self.assertTrue('stats' in res)
+
+
+    def test_optimizeMaximumIterationsReached(self):
+        '''Test than an OptimizerError is raised when maximum number of iterations is reached.
+        '''
+        optimizer = omsf.Optimizer()
+        optimizer.optimizationOptions = {'ipopt': {'linear_solver': 'ma86', 'max_iter': 10}}
+        
+        with self.assertRaises(omsf.OptimizerError):
+            optimizer.optimize(self._scenario, self._sensorySignal)
+
+    
+    def test_initialAndFinalStateBounds(self):
+        
         # Set initial and final state bounds to 0.
-        lb = cs.vertcat(platform.state.expr(0), platform.state.expr(0))
-        ub = cs.vertcat(platform.state.expr(0), platform.state.expr(0))
-        scenario.terminalConstraint = ct.Inequality(
-            expr=cs.vertcat(scenario.initialState['platform'], scenario.finalState['platform']),
+        lb = cs.vertcat(self._platform.state.expr(0), self._platform.state.expr(0))
+        ub = cs.vertcat(self._platform.state.expr(0), self._platform.state.expr(0))
+        self._scenario.terminalConstraint = ct.Inequality(
+            expr=cs.vertcat(self._scenario.initialState['platform'], self._scenario.finalState['platform']),
             lb=lb, ub=ub
         )
 
         optimizer = omsf.Optimizer()
-        optimizer.optimizationOptions = {'ipopt': {'linear_solver': 'ma86', 'max_iter': 10}}
+        optimizer.optimizationOptions = {'ipopt': {'linear_solver': 'ma86', 'max_iter': 100}}
         
-        data = omsf.io.matlab.loadRecordedMotion(os.path.join(DATA_DIR, 'AccDec.mat'))
-        si = omsf.recordedMotionToSensorySignal(data, np.array([0, 0, -1]))
-        
-        res = optimizer.optimize(scenario, [si.cut(3, 5)])
+        res = optimizer.optimize(self._scenario, self._sensorySignal)
         [pm] = res['trajectory']
         
         # Check that initial and final states are within the specified limits
@@ -88,22 +102,6 @@ class Test(unittest.TestCase):
         state = pm.platformState
         self.assertTrue(np.all(lb - 1e-10 <= cs.vertcat(state(t[0]), state(t[-1]))))
         self.assertTrue(np.all(ub + 1e-10 >= cs.vertcat(state(t[0]), state(t[-1]))))
-
-
-    def test_headFrameGravity(self):
-        
-        platform = MotionPlatformX()
-        
-        x = ct.struct_MX(platform.state.expr)
-        x['q'] = cs.SX.sym('q')
-        x['v'] = cs.DM.zeros(platform.numberOfAxes)
-
-        g_head = platform.headFrameGravity(x=x.cat, g=omsf.DEFAULT_GRAVITY, T_HP=omsf.transform.identity())['g']
-        
-        # Check that the gravity is pointing strictly downwards.
-        self.assertEqual(g_head[0], 0)
-        self.assertEqual(g_head[1], 0)
-        self.assertLess(g_head[2], 0)
 
 
     @unittest.skip("Scenario.simulate() does not work and may be deprecated in future.")

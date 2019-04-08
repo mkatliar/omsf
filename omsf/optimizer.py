@@ -29,6 +29,17 @@ from casadi_extras.collocation import PiecewisePoly, PolynomialBasis, collocatio
 from .gravity import GRAVITY
 
 
+class OptimizerError(RuntimeError):
+    '''Raised when NLP solver in Optimizer.optimize() fails.
+
+    @param solver_name NLP solver name
+    @param stats stats structure from the NLP solver.
+    '''
+    def __init__(self, solver_name, stats):
+        RuntimeError.__init__(self, 'Nlp solver {0} failed: {1}'.format(solver_name, stats['return_status']))
+        self.stats = stats
+
+
 class Optimizer(object):
     '''Trajectory and parameters optimizer.
     '''
@@ -129,8 +140,14 @@ class Optimizer(object):
         
         # Run the optimization.
         print('Starting optimization.')
-        sol_out = nlp_solver(x0=cs.vertcat(*w0), lbg=cs.vertcat(*lbg), ubg=cs.vertcat(*ubg), 
+        sol_out = nlp_solver(x0=cs.vertcat(*w0), lbg=cs.vertcat(*lbg), ubg=cs.vertcat(*ubg),
             lbx=cs.vertcat(*lbw), ubx=cs.vertcat(*ubw))
+
+        # Get solver stats and check that if has succeeded.
+        stats = nlp_solver.stats()
+        if not stats['success']:
+            raise OptimizerError(self.nlpSolverPlugin, stats)
+
         
         # Extract optimized trajectories
         nw = 0
@@ -147,7 +164,7 @@ class Optimizer(object):
         # Extract optimized parameters
         par_opt = w_opt['p'][:, -1]
         
-        return {'trajectory': res, 'param': par_opt, 'objective': sol_out['f']}
+        return {'trajectory': res, 'param': par_opt, 'objective': sol_out['f'], 'stats': stats}
 
 
     def _initBounds(self, w, g, scenario):

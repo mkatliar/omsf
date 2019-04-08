@@ -8,8 +8,8 @@ visual-vestibular integration can be taken into account.
 # Installation
 It is recommended to install OMSF in a virtual environment. To prepare the virtual environment, do
 ```bash
-virtualenv -p python3 venv
-source venv/bin/activate
+virtualenv -p python3 .venv
+source .venv/bin/activate
 ```
 Then, install OMSF using pip:
 ```bash
