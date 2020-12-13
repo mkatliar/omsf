@@ -24,7 +24,7 @@ Created on Oct 9, 2015
 '''
 import casadi as cs
 import numpy as np
-import math
+import numbers
 
 
 def mul(*args):
@@ -47,58 +47,49 @@ def inv(T):
     )
 
 
-def identity(dtype=float):
+def identity(dtype=cs.DM):
     '''Identity transform
     '''
-
-    if _isSymbolic(dtype):
-        return cs.MX.eye(4)
-    else:
-        return np.identity(4)
+    return _eye(dtype)
 
     
 def translation(xyz):
     '''Translation by vector
     '''
-
-    T = _eye(type(xyz[0]))        
-    T[: 3, 3] = xyz                
+    T = _eye(type(xyz[0]))
+    T[: 3, 3] = xyz
     return T
 
     
 def translationX(x):
     '''Translation along the X axis
     '''
-
-    T = _eye(type(x))        
-    T[0, 3] = x                
+    T = _eye(type(x))
+    T[0, 3] = x
     return T
 
     
 def translationY(y):
     '''Translation along the Y axis
     '''
-
-    T = _eye(type(y))        
-    T[1, 3] = y                
+    T = _eye(type(y))
+    T[1, 3] = y
     return T
 
     
 def translationZ(z):
     '''Translation along the Z axis
     '''
-
-    T = _eye(type(z))        
-    T[2, 3] = z                
+    T = _eye(type(z))
+    T[2, 3] = z
     return T
 
     
 def rotationZ(theta):
     '''Rotation around the Z axis
     '''
-
-    T = _eye(type(theta))     
-    T[0, 0] = T[1, 1] = _cos(theta)                
+    T = _eye(type(theta))
+    T[0, 0] = T[1, 1] = _cos(theta)
     T[1, 0] = _sin(theta)
     T[0, 1] = -T[1, 0]
     return T
@@ -107,9 +98,8 @@ def rotationZ(theta):
 def rotationY(theta):
     '''Rotation around the Y axis
     '''
-
-    T = _eye(type(theta))     
-    T[0, 0] = T[2, 2] = _cos(theta)                
+    T = _eye(type(theta))
+    T[0, 0] = T[2, 2] = _cos(theta)
     T[0, 2] = _sin(theta)
     T[2, 0] = -T[0, 2]
     return T
@@ -118,9 +108,8 @@ def rotationY(theta):
 def rotationX(theta):
     '''Rotation around the X axis
     '''
-
-    T = _eye(type(theta))     
-    T[1, 1] = T[2, 2] = _cos(theta)                
+    T = _eye(type(theta))
+    T[1, 1] = T[2, 2] = _cos(theta)
     T[2, 1] = _sin(theta)
     T[1, 2] = -T[2, 1]
     return T
@@ -129,33 +118,30 @@ def rotationX(theta):
 def denavitHartenberg(a, d, alpha, theta):
     '''Transform between two frames defined by Denavit-Hartenberg parameters
     '''
-
     return cs.mtimes([rotationZ(theta), translationZ(d), rotationX(alpha), translationX(a)])
 
     
 def getRotationMatrix(T):
     '''Get rotation matrix form a 4x4 homogeneous transformation matrix.
     '''
-
     return T[: 3, : 3]
 
 
 def getTranslationVector(T):
     '''Get rotation matrix form a 4x4 homogeneous transformation matrix.
     '''
-
     return T[: 3, 3]
 
     
-_tolCos = 2. * math.cos(math.pi / 2.)
-_tolSin = 2. * math.sin(math.pi)
+_tolCos = 2. * np.cos(np.pi / 2.)
+_tolSin = 2. * np.sin(np.pi)
 
 
 def _eye(dtype):
-    if _isSymbolic(dtype):
-        return cs.MX.eye(4)
-    else:
+    if _isNumeric(dtype):
         return np.identity(4)
+    else:
+        return dtype.eye(4)
 
     
 def _mul(*args):
@@ -163,26 +149,28 @@ def _mul(*args):
 
     
 def _cos(x):
-    if _isSymbolic(type(x)):
-        return cs.cos(x)
-    else:
-        c = math.cos(x)
-        if math.fabs(c) <= _tolCos:
-            return 0.
-            
-        return c
+    y = cs.cos(x)
+    ty = type(y)
+
+    if _isNumeric(ty) and np.abs(y) <= _tolCos:
+        y = ty(0)
+    
+    return y
 
         
 def _sin(x):
-    if _isSymbolic(type(x)):
-        return cs.sin(x)
-    else:
-        s = math.sin(x)
-        if math.fabs(s) <= _tolSin:
-            return 0.
+    y = cs.sin(x)
+    ty = type(y)
+
+    if _isNumeric(ty) and np.abs(y) <= _tolSin:
+        y = ty(0)
             
-        return s
+    return y
 
 
-def _isSymbolic(t):
-    return t == cs.SX or t == cs.MX
+def _isSymbolic(dtype):
+    return dtype == cs.SX or dtype == cs.MX
+
+
+def _isNumeric(dtype):
+    return issubclass(dtype, numbers.Number)

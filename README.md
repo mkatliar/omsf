@@ -30,3 +30,6 @@ Then, install OMSF using pip:
 ```bash
 pip install git+ssh://git@github.com/mkatliar/omsf.git#egg=omsf
 ```
+
+OMSF relies on the `Ipopt` optimizer, which in turn uses linear solvers.
+For better performance, it is recommended to install the `HSL` library that contains high-performance linear solvers: https://github.com/casadi/casadi/wiki/Obtaining-HSL

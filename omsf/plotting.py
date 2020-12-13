@@ -39,7 +39,7 @@ def _plot_components(fig, t, y, ttl, x_label, y_label, *args, **kwargs):
         y = y.T
 
     n_comp = y.shape[1]
-    n_rows = n_comp / 3
+    n_rows = n_comp // 3
     
     if not isinstance(y_label, list):
         y_label = [y_label for _ in range(n_comp)]
