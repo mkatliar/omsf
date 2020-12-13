@@ -150,7 +150,7 @@ setup(
         'control',
         'scipy',
         'matplotlib',
-        'casadi_extras @ git+ssh://git@github.com/mkatliar/casadi_extras.git#egg=casadi_extras'
+        'casadi_extras @ git+https://github.com/mkatliar/casadi_extras.git#egg=casadi_extras'
     ],
 
     # List additional groups of dependencies here (e.g. development
