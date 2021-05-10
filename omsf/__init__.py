@@ -27,5 +27,6 @@ from .sensory_signal import SensorySignal
 from .recorded_motion import *
 from .gravity import GRAVITY, DEFAULT_GRAVITY
 from .signal import *
-from .util import recordedMotionToSensorySignal, evaluateMotion, transformInertialSignal
+from .util import recordedMotionToSensorySignal, evaluateMotion, transformInertialSignal, \
+    inertialSignalFromTransformationMatrix, inertialSignalFromTransformationMatrixAndDerivatives
 from .optimizer import Optimizer, OptimizerError

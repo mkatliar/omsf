@@ -1,19 +1,19 @@
 ##
 ## Copyright (c) 2015-2018 Mikhail Katliar, Max Planck Institute for Biological Cybernetics.
-## 
-## This file is part of Offline Motion Simulation Framework (OMSF) 
+##
+## This file is part of Offline Motion Simulation Framework (OMSF)
 ## (see https://github.com/mkatliar/omsf).
-## 
+##
 ## This program is free software: you can redistribute it and/or modify
 ## it under the terms of the GNU Lesser General Public License as published by
 ## the Free Software Foundation, either version 3 of the License, or
 ## (at your option) any later version.
-## 
+##
 ## This program is distributed in the hope that it will be useful,
 ## but WITHOUT ANY WARRANTY; without even the implied warranty of
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU Lesser General Public License for more details.
-## 
+##
 ## You should have received a copy of the GNU Lesser General Public License
 ## along with this program. If not, see <http://www.gnu.org/licenses/>.
 ##
@@ -34,15 +34,16 @@ class PrismaticLink:
         self._a = a
         self._alpha = alpha
         self._theta = theta
-        
-    def LocalToBase(self, d):
-        return transform.denavitHartenberg(self._a, d, self._alpha, self._theta)
-            
+
+        d = cs.MX.sym('d')
+        self.LocalToBase = cs.Function('PrismaticLink_LocalToBase', [d],
+            [transform.denavitHartenberg(self._a, d, self._alpha, self._theta)])
+
 
 class RevoluteLink:
     '''Revolute link class.
     '''
-    
+
     def __init__(self, a, d, alpha, theta_scale=1, theta_offset=0):
         self._a = a
         self._d = d
@@ -54,8 +55,7 @@ class RevoluteLink:
             transform.rotationX(self._alpha),
             transform.translationX(self._a)
         ])
-            
-    def LocalToBase(self, theta):
-        return transform.denavitHartenberg(self._a, self._d, self._alpha, 
-                                           self._thetaScale * theta + self._thetaOffset)
-        
+
+        theta = cs.MX.sym('theta')
+        self.LocalToBase = cs.Function('RevoluteLink_LocalToBase', [theta],
+            [transform.denavitHartenberg(self._a, self._d, self._alpha, self._thetaScale * theta + self._thetaOffset)])
