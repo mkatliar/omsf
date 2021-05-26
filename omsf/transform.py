@@ -118,6 +118,8 @@ def rotationX(theta):
 
 def rotationQ(q):
     '''4x4 rotation matrix from quaternion
+
+    @param q quaternion format [w, x, y, z]
     '''
     T = _eye(type(q[0]))
     T[: 3, : 3] = quatR(q)
@@ -137,7 +139,7 @@ def getRotationMatrix(T):
 
 
 def getTranslationVector(T):
-    '''Get rotation matrix form a 4x4 homogeneous transformation matrix.
+    '''Get translation vector form a 4x4 homogeneous transformation matrix.
     '''
     return T[: 3, 3]
 
