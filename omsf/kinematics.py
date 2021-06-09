@@ -1,5 +1,6 @@
 ##
-## Copyright (c) 2015-2018 Mikhail Katliar, Max Planck Institute for Biological Cybernetics.
+## Copyright (c) 2015-2021 Mikhail Katliar,
+## Max Planck Institute for Biological Cybernetics & University of Freiburg.
 ##
 ## This file is part of Offline Motion Simulation Framework (OMSF)
 ## (see https://github.com/mkatliar/omsf).
@@ -35,7 +36,7 @@ class PrismaticLink:
         self._alpha = alpha
         self._theta = theta
 
-        d = cs.MX.sym('d')
+        d = cs.SX.sym('d')
         self.LocalToBase = cs.Function('PrismaticLink_LocalToBase', [d],
             [transform.denavitHartenberg(self._a, d, self._alpha, self._theta)])
 
@@ -56,6 +57,6 @@ class RevoluteLink:
             transform.translationX(self._a)
         ])
 
-        theta = cs.MX.sym('theta')
+        theta = cs.SX.sym('theta')
         self.LocalToBase = cs.Function('RevoluteLink_LocalToBase', [theta],
             [transform.denavitHartenberg(self._a, self._d, self._alpha, self._thetaScale * theta + self._thetaOffset)])

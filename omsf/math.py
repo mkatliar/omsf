@@ -33,10 +33,11 @@ def crossProductMatrix(omega):
     cross_product_matrix_arg is its inverse.
     See also http://en.wikipedia.org/wiki/Cross_product#Conversion_to_matrix_multiplication.
     '''
-    return cs.vertcat([
-        cs.horzcat([0, -omega[2], omega[1]]),
-        cs.horzcat([omega[2], 0, -omega[0]]),
-        cs.horzcat([-omega[1], omega[0], 0])])
+    return cs.vertcat(
+        cs.horzcat(0, -omega[2], omega[1]),
+        cs.horzcat(omega[2], 0, -omega[0]),
+        cs.horzcat(-omega[1], omega[0], 0)
+    )
 
 
 def quatE(q):
@@ -47,7 +48,7 @@ def quatE(q):
         cs.horzcat(-q[1],  q[0], -q[3],  q[2]),
         cs.horzcat(-q[2],  q[3],  q[0], -q[1]),
         cs.horzcat(-q[3], -q[2],  q[1],  q[0])
-        )
+    )
 
 
 def quatG(q):
@@ -58,7 +59,7 @@ def quatG(q):
         cs.horzcat(-q[1],  q[0],  q[3], -q[2]),
         cs.horzcat(-q[2], -q[3],  q[0],  q[1]),
         cs.horzcat(-q[3],  q[2], -q[1],  q[0])
-        )
+    )
 
 
 def quatR(q):
