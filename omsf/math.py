@@ -43,6 +43,8 @@ def crossProductMatrix(omega):
 def quatE(q):
     '''
     @param q quaternion format [w, x, y, z]
+
+    See B. Graf, Quaternions And Dynamics https://arxiv.org/pdf/0811.2889.pdf, eq (15,16).
     '''
     return cs.vertcat(
         cs.horzcat(-q[1],  q[0], -q[3],  q[2]),
@@ -54,6 +56,8 @@ def quatE(q):
 def quatG(q):
     '''
     @param q quaternion format [w, x, y, z]
+
+    See B. Graf, Quaternions And Dynamics https://arxiv.org/pdf/0811.2889.pdf, eq (17,18).
     '''
     return cs.vertcat(
         cs.horzcat(-q[1],  q[0],  q[3], -q[2]),
