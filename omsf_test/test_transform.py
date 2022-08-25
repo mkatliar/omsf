@@ -70,5 +70,12 @@ class TransformTest(unittest.TestCase):
         ), atol=1e-8)
 
 
+    def test_getRotationAngle(self):
+        """Test omsf.transform.getRotationAngle()
+        """
+        T = transform.rotationQ([0.9689124, 0.0661215, 0.132243, 0.1983645])
+        self.assertAlmostEqual(transform.getRotationAngle(T), 0.5, delta=1e-6)
+
+
 if __name__ == "__main__":
     unittest.main()

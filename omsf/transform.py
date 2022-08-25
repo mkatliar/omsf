@@ -22,10 +22,17 @@ Created on Oct 9, 2015
 
 @author: mkatliar
 '''
+from typing import Union
 import casadi as cs
 import numpy as np
 import numbers
 from .math import quatR
+
+
+"""
+A matrix that can be either numeric or symbolic.
+"""
+Matrix = Union[cs.DM, cs.SX, cs.MX]
 
 
 def mul(*args):
@@ -132,7 +139,7 @@ def denavitHartenberg(a, d, alpha, theta):
     return cs.mtimes([rotationZ(theta), translationZ(d), rotationX(alpha), translationX(a)])
 
 
-def getRotationMatrix(T):
+def getRotationMatrix(T: Matrix) -> Matrix:
     '''Get rotation matrix form a 4x4 homogeneous transformation matrix.
     '''
     return T[: 3, : 3]
@@ -142,6 +149,19 @@ def getTranslationVector(T):
     '''Get translation vector form a 4x4 homogeneous transformation matrix.
     '''
     return T[: 3, 3]
+
+
+def getRotationAngle(T: Matrix) -> Matrix:
+    '''
+    Get rotation angle from a 4x4 homogeneous transformation matrix.
+
+    For the math part, see e.g. https://en.wikipedia.org/wiki/Rotation_matrix#Determining_the_angle
+
+    @param T 4x4 homogeneous transformation matrix
+
+    @return a scalar representing the rotation angle around T's eigenvector, from the range [0, pi].
+    '''
+    return cs.acos((cs.trace(getRotationMatrix(T)) - 1.) / 2.)
 
 
 _tolCos = 2. * np.cos(np.pi / 2.)
